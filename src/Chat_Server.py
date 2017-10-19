@@ -2,6 +2,7 @@ import threading
 from socket import*
 import sys
 import os
+
 threads = []
 
 programActive = True
@@ -24,7 +25,7 @@ def main():
        
         connectionSocket, addr = serverSocket.accept()
         
-        newConnectionThread = threading.Thread(target = ManageJoiningThread, args = (connectionSocket, addr,))
+        newConnectionThread = threading.Thread(target = ManageJoiningThread, args = (connectionSocket, addr, serverSocket,))
         threads.append(newConnectionThread)
         newConnectionThread.start()
         
@@ -32,7 +33,7 @@ def main():
 
 
 
-def ManageJoiningThread(connectionSocket, addr):
+def ManageJoiningThread(connectionSocket, addr, serverSocket):
     print("New Thread Established for new connection: ", connectionSocket, addr)
 
     while 1:
@@ -40,7 +41,11 @@ def ManageJoiningThread(connectionSocket, addr):
         if not receivedData:
             print("Closing thread due to lack of data received")
             break
-        print(receivedData.decode())
+        message = receivedData.decode()
+        print(message)
+        if(message == 'HELO text\n'):
+            send_helo_response(connectionSocket, serverSocket)
+           
     
     connectionSocket.close
     
@@ -55,4 +60,13 @@ def LookForQuit(serverSocket):
             os._exit(1)
             return
 
-main()
+def send_helo_response(connectionSocket, serverSocket):
+    ip_address = serverSocket.getsockname()[0]
+    port_number = serverSocket.getsockname()[1]
+    respond_with = ["HELO text\nIP:", str(ip_address), '\nPort:', str(port_number), '\nStudentID:14334496\n']
+    message_to_send = ''
+
+    message_to_send = " ".join([str(x) for x in respond_with])
+    print("About to send: ", message_to_send)
+    connectionSocket.send(message_to_send.encode('utf-8'))
+main()  

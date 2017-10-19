@@ -10,32 +10,42 @@ def main():
     print("Connected to socket")
 
 
-    quit_Check_Thread = threading.Thread(target=LookForQuit, args = (clientSocket,))
+    quit_Check_Thread = threading.Thread(target=read_out_socket_messages, args = (clientSocket,))
     
     quit_Check_Thread.start()
    
     while 1:
 
         
-        message = input("Message received by the main thread: ")
-        print("About to send: ", message)
-        bytes_Sent = clientSocket.sendto(message.encode('utf-8'), (serverName, serverPort))
-        #
-            #'However you want to package data received from the socket' = clientSocket.recv(1024)
-        print(bytes_Sent, " bytes sent")
+        client_message = input()
+        if(client_message == 'close'):
+            execute_quit(clientSocket)
+        elif(client_message == 'helo'):
+            send_helo(clientSocket, serverName, serverPort)
+
    
             
     clientSocket.close()
 
-def LookForQuit(clientSocket):
-    
-    while 1:
-        command = input("Message to be received by the other thread: ")
-        if command == "close":
-            clientSocket.close()
-            os._exit(1)
-            return
+#Function looking out for 'close' to end client socket
+def execute_quit(clientSocket):
+    clientSocket.close()
+    os._exit(1)
+    return
 
+def read_out_socket_messages(clientSocket):
+    while 1:
+        receivedData = clientSocket.recv(1024)
+        if not receivedData:
+            print("Closing client thread due to lack of data received")
+            break
+        print(receivedData.decode())
+    
+    clientSocket.close
+
+def send_helo(clientSocket, serverName, serverPort):
+    message = 'HELO text\n'
+    clientSocket.sendto(message.encode('utf-8'), (serverName, serverPort))
 main()
     
 
