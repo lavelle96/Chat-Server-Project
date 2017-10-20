@@ -5,72 +5,71 @@ import os
 
 threads = []
 
-programActive = True
 def main():
-    serverPort = 10006
-
-    serverSocket = socket(AF_INET,SOCK_STREAM)
-    
-    serverSocket.bind(('',serverPort))
-    
-    serverSocket.listen(1)
+    """Main Function of program"""
+    server_port = 10006
+    server_socket = socket(AF_INET,SOCK_STREAM)
+    server_socket.bind(('',server_port))
+    server_socket.listen(1)
     print('The server is ready to receive')
     
-   
-    quit_Check_Thread = threading.Thread(target=LookForQuit, args = (serverSocket,))
+    #Setup thread looking for command to quit program
+    quit_Check_Thread = threading.Thread(target=look_for_quit, args = (server_socket,))
     threads.append
     quit_Check_Thread.start()
  
     while 1:
-       
-        connectionSocket, addr = serverSocket.accept()
+       #Accept connections from clients and start a new thread handling each new connection
+        connection_socket, addr = server_socket.accept()
         
-        newConnectionThread = threading.Thread(target = ManageJoiningThread, args = (connectionSocket, addr, serverSocket,))
-        threads.append(newConnectionThread)
-        newConnectionThread.start()
+        new_connection_thread = threading.Thread(target = manage_connection_thread, args = (connection_socket, addr, server_socket,))
+        threads.append(new_connection_thread)
+        new_connection_thread.start()
         
-    connectionSocket.close()
+    connection_socket.close()
 
 
 
-def ManageJoiningThread(connectionSocket, addr, serverSocket):
-    print("New Thread Established for new connection: ", connectionSocket, addr)
+def manage_connection_thread(connection_socket, addr, server_socket):
+    """Function invoked by new threads managing new connections"""
+    print("New Thread Established for new connection: ", connection_socket, addr)
 
     while 1:
-        receivedData = connectionSocket.recv(1024)
+        received_data = connection_socket.recv(1024)
 
         #Close socket connection with client if their side is down
-        if not receivedData:
+        if not received_data:
             print("Closing thread due to lack of data received")
             break
         
-        message = receivedData.decode()
+        message = received_data.decode()
         print(message)
         if(message == 'HELO text\n'):
-            send_helo_response(connectionSocket, serverSocket)
+            send_helo_response(connection_socket, server_socket)
            
     
-    connectionSocket.close
+    connection_socket.close()
     
 #Function looking out for 'KILL_SERVICE' to end client socket
-def LookForQuit(serverSocket):
-    print("Thread started looking for end")
+def look_for_quit(server_socket):
+    """Function checking everything input on the command line and stopping the program if KILL_SERVICE is input """
+    """Warning: will have to be altered if the command line is needed for any other functionality"""
+    """Thread"""
     while 1:
         command = input()
         if command == "KILL_SERVICE":
-            serverSocket.close()
-           
+            server_socket.close()
             os._exit(1)
             return
 
-def send_helo_response(connectionSocket, serverSocket):
-    ip_address = serverSocket.getsockname()[0]
-    port_number = serverSocket.getsockname()[1]
+def send_helo_response(connection_socket, server_socket):
+    """Function called when the input is helo"""
+    """Sends a message back to connected client"""
+    ip_address = server_socket.getsockname()[0]
+    port_number = server_socket.getsockname()[1]
     respond_with = ["HELO text\nIP:", str(ip_address), '\nPort:', str(port_number), '\nStudentID:14334496\n']
-    message_to_send = ''
-
     message_to_send = " ".join([str(x) for x in respond_with])
-    connectionSocket.send(message_to_send.encode('utf-8'))
+    connection_socket.send(message_to_send.encode('utf-8'))
 
 
 main()  
