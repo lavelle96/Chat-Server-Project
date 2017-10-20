@@ -38,9 +38,12 @@ def ManageJoiningThread(connectionSocket, addr, serverSocket):
 
     while 1:
         receivedData = connectionSocket.recv(1024)
+
+        #Close socket connection with client if their side is down
         if not receivedData:
             print("Closing thread due to lack of data received")
             break
+        
         message = receivedData.decode()
         print(message)
         if(message == 'HELO text\n'):
@@ -67,6 +70,7 @@ def send_helo_response(connectionSocket, serverSocket):
     message_to_send = ''
 
     message_to_send = " ".join([str(x) for x in respond_with])
-    print("About to send: ", message_to_send)
     connectionSocket.send(message_to_send.encode('utf-8'))
+
+
 main()  
