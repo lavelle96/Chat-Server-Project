@@ -11,12 +11,9 @@ class chatroom:
         self.room_reference = room_reference
         self.chatroom_name = chatroom_name
 
-    """JOINED_CHATROOM: [chatroom name]
-		  SERVER_IP: [IP address of chat room]
-		  PORT: [port number of chat room]
-		  ROOM_REF: [integer that uniquely identifies chat room on server]
-		  JOIN_ID: [integer that uniquely identifies client joining]"""
+   
     def addClient(self, connection_socket, client_name):
+    """Adds client to current connected_clients array and sends a confirmaion message back to the client"""
         new_client = [client_name, self.current_id, connection_socket]
         
         self.connected_clients.append(new_client)
@@ -26,6 +23,7 @@ class chatroom:
         self.current_id = self.current_id+1
     
     def send_message_to_connected_clients(self, message, client_name):
+        """Sends given message to every connected client in the chat room"""
         message_with_new_line = message + '\n\n'
         message_array = ["CHAT: ", self.room_reference, "\nCLIENT_NAME: ", client_name, '\nMESSAGE: ', message_with_new_line, '\n']
         message_to_send = " ".join([str(x) for x in message_array])
@@ -34,6 +32,7 @@ class chatroom:
             connection_socket.send(message_to_send.encode('utf-8'))
 
     def is_client_in_chatroom(self, join_id, client_name):
+        """Checks whether or not a given client is in the chat room"""
         for client in self.connected_clients:
             if join_id == client[1] and client_name == client[0]:
                 return True

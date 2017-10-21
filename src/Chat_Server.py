@@ -19,9 +19,10 @@ def main():
     print('The server is ready to receive')
     
     #Setup thread looking for command to quit program
-    quit_Check_Thread = threading.Thread(target=manage_command_line_input, args = (server_socket,))
-    threads.append
-    quit_Check_Thread.start()
+    global threads
+    command_control_thread = threading.Thread(target=manage_command_line_input, args = (server_socket,))
+    threads.append(command_control_thread)
+    command_control_thread.start()
  
     while 1:
        #Accept connections from clients and start a new thread handling each new connection
