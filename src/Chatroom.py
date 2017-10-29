@@ -11,7 +11,7 @@ class chatroom:
         self.connected_clients = []
         self.current_id = 0
    
-    def addClient(self, connection_socket, client_name):
+    def manage_client_join_and_response(self, connection_socket, client_name):
         """Adds client to current connected_clients array and sends a confirmaion message back to the client"""
         new_client = [client_name, self.current_id, connection_socket]
         print('client ' + client_name + ' added ' + ' to ' + self.chatroom_name)

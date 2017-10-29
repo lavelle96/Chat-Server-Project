@@ -6,13 +6,10 @@ from Chatroom import chatroom
 from Message_Parser import parse_join
 
 
-
-
-
 class chat_server():
     
     def __init__(self):
-        """Main Function of program"""
+        """Set up thread to accept connections"""
         self.threads = []
         #active_chatrooms structure: ([Chatroom object, room reference])
         self.active_chatrooms = []
@@ -67,7 +64,6 @@ class chat_server():
     #Function looking out for 'KILL_SERVICE' to end client socket
     def manage_command_line_input(self, server_socket):
         """Function checking everything input on the command line and stopping the program if KILL_SERVICE is input """
-        """Warning: will have to be altered if the command line is needed for any other functionality"""
         """Thread"""
         while 1:
             command = input()
@@ -99,6 +95,9 @@ class chat_server():
         connection_socket.send(message_to_send.encode('utf-8'))
 
     def manage_join(self, message, connection_socket):
+        """Adds a client to a chat room
+        Creates a chat room if the one in question doesnt exist
+        Increments the global room reference"""
         chatroom_name, client_name = parse_join(message)
         chatroom_index = self.does_chatroom_exist(chatroom_name)
         #self.chatroom_lock.acquire()
@@ -106,17 +105,13 @@ class chat_server():
             print('creating new chatroom: ' + chatroom_name)
             
             new_chatroom = chatroom(self.current_room_reference, chatroom_name)
-            new_chatroom.addClient(connection_socket, client_name)
+            new_chatroom.manage_client_join_and_response(connection_socket, client_name)
             self.active_chatrooms.append([new_chatroom, self.current_room_reference])
             self.current_room_reference = self.current_room_reference + 1
         else:
             self.active_chatrooms[chatroom_index][0].addClient(connection_socket, client_name)
 
-        #self.chatroom_lock.release()
-        #parse message
-        #Create chatroom if necessary
-        #Add socket to chat room
-        #Send message back to client with confirmation
+        
 
     def does_chatroom_exist(self, chatroom_name):
         #self.chatroom_lock.acquire()
