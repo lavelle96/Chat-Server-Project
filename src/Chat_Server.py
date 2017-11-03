@@ -5,8 +5,8 @@ import os
 from Chatroom import chatroom
 from Message_Parser import parse_join, parse_leave, parse_disconnect, parse_chat
 
-SERVER_IP = '134.226.44.50'
-SERVER_PORT = '10006'
+SERVER_IP = '134.226.214.254'
+SERVER_PORT = 10006
 class chat_server():
     
     def __init__(self):
@@ -52,13 +52,13 @@ class chat_server():
             
             message = received_data.decode()
             print(message)
-                message_split = message.split()
-                if(message_split[0] == 'HELO\n'):
-                    self.send_helo_response(connection_socket, server_socket)
-                if(message_split[0] == 'JOIN_CHATROOM:'):
-                   self.manage_join(message, connection_socket)
-                elif(message_split[0] == 'CHAT:'):
-                    self.manage_chat(message, connection_socket)
+            message_split = message.split()
+            if(message_split[0] == 'HELO\n'):
+                self.send_helo_response(connection_socket, server_socket)
+            elif(message_split[0] == 'JOIN_CHATROOM:'):
+                self.manage_join(message, connection_socket)
+            elif(message_split[0] == 'CHAT:'):
+                self.manage_chat(message, connection_socket)
                     
         
         connection_socket.close()
@@ -92,7 +92,7 @@ class chat_server():
         """Sends a message back to connected client"""
         ip_address = SERVER_IP
         port_number = SERVER_PORT
-        respond_with = ["HELO text\nIP:", str(ip_address), '\nPort:', str(port_number), '\nStudentID:14334496\n']
+        respond_with = ["HELO text\nIP:", ip_address, '\nPort:', str(port_number), '\nStudentID:14334496\n']
         message_to_send = " ".join([str(x) for x in respond_with])
         connection_socket.send(message_to_send.encode('utf-8'))
 
