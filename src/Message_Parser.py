@@ -3,6 +3,9 @@
 
 def parse_join(message):
     split_message = message.split('\n')
+    if(len(split_message) < 4):
+        return None, None
+
     chatroom_name = split_message[0][15:]
     client_name = split_message[3][13:]
     return chatroom_name, client_name

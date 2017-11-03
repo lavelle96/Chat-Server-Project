@@ -11,6 +11,7 @@ class chat_server():
     
     def __init__(self):
         """Set up thread to accept connections"""
+        l.basicConfig(filename='Server.log',level=l.DEBUG)
         self.threads = []
         #active_chatrooms structure: ([Chatroom object, room reference])
         self.active_chatrooms = []
@@ -42,6 +43,7 @@ class chat_server():
 
     def manage_connection_thread(self, connection_socket, addr, server_socket):
         """Function invoked by new threads managing new connections"""
+        l.info(l_pre + 'Managing new connection on new thread')
         while 1:
             received_data = connection_socket.recv(1024)
 
@@ -67,6 +69,7 @@ class chat_server():
     def manage_command_line_input(self, server_socket):
         """Function checking everything input on the command line and stopping the program if KILL_SERVICE is input """
         """Thread"""
+        l.info(l_pre + 'Thread set up to manage command line info')
         while 1:
             command = input()
             if command == "KILL_SERVICE":
@@ -86,7 +89,8 @@ class chat_server():
                 #self.chatroom_lock.release() 
 
                 
-#----------------------------------------------Handle server Functionalities-------------------------------------------------
+#----------------------FUNCTIONS TO MANAGE CLIENT CALLS----------------------
+
     def send_helo_response(self, connection_socket, server_socket):
         """Function called when the input is helo"""
         """Sends a message back to connected client"""
@@ -100,10 +104,14 @@ class chat_server():
         """Adds a client to a chat room
         Creates a chat room if the one in question doesnt exist
         Increments the global room reference"""
+        l.info(l_pre + 'Managing join for client')
         chatroom_name, client_name = parse_join(message)
+        if(chatroom_name == None):
+            print("Incomplete join call")
+            return 
         chatroom_index = self.does_chatroom_exist(chatroom_name)
         if(chatroom_index == -1):
-            print('creating new chatroom: ' + chatroom_name)
+            l.info(l_pre + 'Creating new chatroom')
             
             new_chatroom = chatroom(self.current_room_reference, chatroom_name)
             new_chatroom.manage_client_join_and_response(connection_socket, client_name)
@@ -113,21 +121,19 @@ class chat_server():
             self.active_chatrooms[chatroom_index][0].manage_client_join_and_response(connection_socket, client_name)
 
     def manage_chat(self, message, connection_socket):
-        chat_room, join_id, client_name, message = parse_chat(message)            
-
+        """parses message then sends it to the appropriate chat room"""
+        l.info(l_pre + 'Sending chat to appropriate chatrooms')
+        room_ref, join_id, client_name, message = parse_chat(message)
+        
         for chatroom in self.active_chatrooms:
-            if chatroom[1] == chat_room:
-                chatroom[0].send_message_to_connected_clients(message, client_name, connection_socket)
+            if chatroom[1] == int(room_ref):             
+                chatroom[0].send_message_to_connected_clients(message, client_name, join_id)
                 break
 
-
     def does_chatroom_exist(self, chatroom_name):
-        #self.chatroom_lock.acquire()
         for i, chatroom in enumerate(self.active_chatrooms):
             if chatroom[0].chatroom_name == chatroom_name:
-                #self.chatroom_lock.release
                 return i
-        #self.chatroom_lock.release
         return -1
         
 
