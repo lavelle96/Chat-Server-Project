@@ -44,4 +44,4 @@ def leave_test():
     test_message = 'LEAVE_CHATROOM: [ROOM_REF]\nJOIN_ID: [integer previously provided by server on join]\nCLIENT_NAME: [string Handle to identifier client user]\n'
     print(parse_leave(test_message))
 
-leave_test()
+#leave_test()

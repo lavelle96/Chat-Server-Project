@@ -3,9 +3,10 @@ from socket import*
 import sys
 import os
 from Chatroom import chatroom
-from Message_Parser import parse_join
+from Message_Parser import parse_join, parse_leave, parse_disconnect, parse_chat
 
-
+SERVER_IP = '134.226.44.50'
+SERVER_PORT = '10006'
 class chat_server():
     
     def __init__(self):
@@ -15,7 +16,7 @@ class chat_server():
         self.active_chatrooms = []
         self.current_room_reference = 0
         #self.chatroom_lock = threading.Lock()
-        self.server_port = 10006
+        self.server_port = SERVER_PORT
         self.server_socket = socket(AF_INET,SOCK_STREAM)
         self.server_socket.bind(('',self.server_port))
         self.server_socket.listen(1)
@@ -51,12 +52,13 @@ class chat_server():
             
             message = received_data.decode()
             print(message)
-            if(message == 'HELO text\n'):
-                self.send_helo_response(connection_socket, server_socket)
-            else:
                 message_split = message.split()
+                if(message_split[0] == 'HELO\n'):
+                    self.send_helo_response(connection_socket, server_socket)
                 if(message_split[0] == 'JOIN_CHATROOM:'):
                    self.manage_join(message, connection_socket)
+                elif(message_split[0] == 'CHAT:'):
+                    self.manage_chat(message, connection_socket)
                     
         
         connection_socket.close()
@@ -84,12 +86,12 @@ class chat_server():
                 #self.chatroom_lock.release() 
 
                 
-
+#----------------------------------------------Handle server Functionalities-------------------------------------------------
     def send_helo_response(self, connection_socket, server_socket):
         """Function called when the input is helo"""
         """Sends a message back to connected client"""
-        ip_address = server_socket.getsockname()[0]
-        port_number = server_socket.getsockname()[1]
+        ip_address = SERVER_IP
+        port_number = SERVER_PORT
         respond_with = ["HELO text\nIP:", str(ip_address), '\nPort:', str(port_number), '\nStudentID:14334496\n']
         message_to_send = " ".join([str(x) for x in respond_with])
         connection_socket.send(message_to_send.encode('utf-8'))
@@ -100,7 +102,6 @@ class chat_server():
         Increments the global room reference"""
         chatroom_name, client_name = parse_join(message)
         chatroom_index = self.does_chatroom_exist(chatroom_name)
-        #self.chatroom_lock.acquire()
         if(chatroom_index == -1):
             print('creating new chatroom: ' + chatroom_name)
             
@@ -109,9 +110,16 @@ class chat_server():
             self.active_chatrooms.append([new_chatroom, self.current_room_reference])
             self.current_room_reference = self.current_room_reference + 1
         else:
-            self.active_chatrooms[chatroom_index][0].addClient(connection_socket, client_name)
+            self.active_chatrooms[chatroom_index][0].manage_client_join_and_response(connection_socket, client_name)
 
-        
+    def manage_chat(self, message, connection_socket):
+        chat_room, join_id, client_name, message = parse_chat(message)            
+
+        for chatroom in self.active_chatrooms:
+            if chatroom[1] == chat_room:
+                chatroom[0].send_message_to_connected_clients(message, client_name, connection_socket)
+                break
+
 
     def does_chatroom_exist(self, chatroom_name):
         #self.chatroom_lock.acquire()
