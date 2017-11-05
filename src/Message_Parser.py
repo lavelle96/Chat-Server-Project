@@ -6,23 +6,23 @@ def parse_join(message):
     if(len(split_message) < 4):
         return None, None
 
-    chatroom_name = split_message[0][15:]
-    client_name = split_message[3][13:]
-    return chatroom_name, client_name
+    chatroom_name = split_message[0].split(':')[1][1:]
+    client_name = split_message[3].split(':')[1][1:]
+    return chatroom_name.strip(), client_name.strip()
 
 def parse_leave(message):
     split_message = message.split('\n')
     chat_room = split_message[0].split(':')[1][1:]
     join_id = split_message[1].split(':')[1][1:]
     client_name = split_message[2].split(':')[1][1:]
-    return chat_room, join_id, client_name
+    return chat_room.strip(), join_id.strip(), client_name.strip()
 
 def parse_disconnect(message):
     split_message = message.split('\n')
     client_ip = split_message[0].split(':')[1][1:]
     client_port = split_message[1].split(':')[1][1:]
     client_name = split_message[2].split(':')[1][1:]
-    return client_ip, client_port, client_name
+    return client_ip.strip(), client_port.strip(), client_name.strip()
 
 def parse_chat(message):
     split_message = message.split('\n')
@@ -31,7 +31,7 @@ def parse_chat(message):
     client_name = split_message[2][13:]
     message = split_message[3][9:]
     message += '\n\n'
-    return chat_room, join_id, client_name, message
+    return chat_room.strip(), join_id.strip(), client_name.strip(), message.strip()
 
 
 #Testing Functions

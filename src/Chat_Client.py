@@ -2,7 +2,7 @@
 from socket import *
 import threading
 import os
-
+import config as cf
 #send helo :to get rseponse from server of server ip address, port and student number
 #send close :to end the client abruptly
 #send join [chatroom name] [client name] :to join chat room 
@@ -18,8 +18,8 @@ import os
 class Client:
     def __init__(self):
         """The main function called to run the program"""
-        server_name = 'localhost'
-        server_port = 10006
+        server_name = cf.SERVER_IP
+        server_port = cf.SERVER_PORT
         client_socket = socket(AF_INET, SOCK_STREAM)
         client_socket.connect((server_name, server_port))
         print("Connected to socket")
@@ -56,11 +56,14 @@ class Client:
                         self.send_disconnect(client_socket, server_name, server_port, client_name)
 
                 elif words_in_message[0] == 'chat':
-                    if len(words_in_message) == 5:
+                    if len(words_in_message) >= 5:
                         room_ref = words_in_message[1]
                         join_id = words_in_message[2]
                         client_name = words_in_message[3]
-                        chat_message = words_in_message[4]
+                        chat_message_tmp = words_in_message[4:]
+                        chat_message = ""
+                        for message in chat_message_tmp:
+                            chat_message = chat_message + message + ' '
                         self.send_chat(client_socket, server_name, server_port, room_ref, join_id, client_name, chat_message)
         
         client_socket.close()
@@ -90,26 +93,24 @@ class Client:
 
     def send_join_chatroom(self, client_socket, server_name, server_port, chatroom_name, client_name):
         """Function invoked to provide the right format of message for join command"""
-        message = ['JOIN_CHATROOM:', chatroom_name, '\nCLIENT_IP: 0\nPORT: 0\nCLIENT_NAME:', client_name, '\n' ]
-        message_to_send = " ".join([str(x) for x in message])
+        message_to_send = 'JOIN_CHATROOM: ' + chatroom_name + '\nCLIENT_IP: 0\nPORT: 0\nCLIENT_NAME: ' + client_name + '\n' 
+       
         client_socket.sendto(message_to_send.encode('utf-8'), (server_name, server_port))
 
     def send_leave_chatroom(self, client_socket, server_name, server_port, room_ref, join_id, client_name):
         """Function invoked to provide the right format of message for leave command"""
-        message = ['LEAVE_CHATROOM:', room_ref, '\nJOIN_ID:', join_id, '\nCLIENT_NAME:', client_name, '\n']
-        message_to_send = " ".join([str(x) for x in message])
+        message_to_send = 'LEAVE_CHATROOM: ' + room_ref + '\nJOIN_ID: ' + join_id + '\nCLIENT_NAME: ' + client_name + '\n'
+        
         client_socket.sendto(message_to_send.encode('utf-8'), (server_name, server_port))
 
     def send_disconnect(self, client_socket, server_name, server_port, client_name):
         """Function invoked to provide the right format of message for disconnect command"""
-        message = ['DISCONNECT: 0\nPORT: 0\nCLIENT_NAME:', client_name, '\n']
-        message_to_send = " ".join([str(x) for x in message])
+        message_to_send = 'DISCONNECT: 0\nPORT: 0\nCLIENT_NAME: ' + client_name + '\n'
         client_socket.sendto(message_to_send.encode('utf-8'), (server_name, server_port))
 
     def send_chat(self, client_socket, server_name, server_port, room_ref, join_id, client_name, chat_message):
         """Function invoked to provide the right format of message for chat command"""
-        message = ['CHAT:', room_ref, '\nJOIN_ID:', join_id, '\nCLIENT_NAME:', client_name, '\nMESSAGE:', chat_message, '\n']
-        message_to_send = " ".join([str(x) for x in message])
+        message_to_send = 'CHAT: ' + room_ref + '\nJOIN_ID: ' + join_id + '\nCLIENT_NAME: ' + client_name + '\nMESSAGE: ' + chat_message + '\n'
         client_socket.sendto(message_to_send.encode('utf-8'), (server_name, server_port))
 
 
