@@ -25,7 +25,7 @@ class chatroom:
         
         self.connected_clients[active_client.name] = active_client
         self.join_ids[active_client.name] = self.current_id
-        message_to_send = join_response(self.chatroom_name, str(cf.SERVER_IP), str(cf.SERVER_PORT), str(self.room_reference), str(self.current_id))
+        message_to_send = join_response(self.chatroom_name, str(cf.SERVER_IP), str(active_client.address[1]), str(self.room_reference), str(self.current_id))
         active_client.socket.send(message_to_send.encode('utf-8'))
         self.send_message_to_connected_clients(active_client.name + " has joined the chatroom", active_client)
         self.current_id = self.current_id+1

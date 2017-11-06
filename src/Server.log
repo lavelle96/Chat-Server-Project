@@ -444,3 +444,17 @@ INFO:root:CHATROOM:sending client1 has joined the chatroom to connected clients
 INFO:root:CHATROOM:sending message to client1
 INFO:root:CHAT_SERVER:Thread set up to manage command line info
 INFO:root:CHAT_SERVER:Thread set up to manage command line info
+INFO:root:CHAT_SERVER:Thread set up to manage command line info
+INFO:root:CHAT_SERVER:Managing new connection on new thread
+INFO:root:CHAT_SERVER:Managing new connection on new thread
+INFO:root:CHAT_SERVER:Managing join for client
+INFO:root:CHATROOM:managing client and join response for client name:client1
+INFO:root:CHATROOM:sending client1 has joined the chatroom to connected clients
+INFO:root:CHATROOM:sending message to client1
+INFO:root:CHAT_SERVER:Thread set up to manage command line info
+INFO:root:CHAT_SERVER:Managing new connection on new thread
+INFO:root:CHAT_SERVER:Managing new connection on new thread
+INFO:root:CHAT_SERVER:Managing join for client
+INFO:root:CHATROOM:managing client and join response for client name:client1
+INFO:root:CHATROOM:sending client1 has joined the chatroom to connected clients
+INFO:root:CHATROOM:sending message to client1

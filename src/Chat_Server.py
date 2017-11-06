@@ -142,7 +142,7 @@ class chat_server():
         """Function checking everything input on the command line and stopping the program if KILL_SERVICE is input """
         """Thread"""
         l.info(l_pre + 'Thread set up to manage command line info')
-       '''  while 1:
+        '''  while 1:
             command = input()
             if command == "KILL_SERVICE":
                 self.server_socket.close()
