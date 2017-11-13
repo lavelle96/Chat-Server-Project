@@ -25,6 +25,7 @@ class chat_server():
         #self.chatroom_lock = threading.Lock()
         self.server_port = cf.SERVER_PORT
         self.server_socket = socket(AF_INET,SOCK_STREAM)
+        self.server_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.server_socket.bind(('',self.server_port))
         self.server_socket.listen(5)
         self.mutex = threading.Lock()
@@ -55,7 +56,7 @@ class chat_server():
         while 1:
             
             received_data = active_client.socket.recv(4096)
-            print('message received')
+          
             #Close socket connection with client if their side is down
             if not received_data:
                 print("Closing thread due to lack of data received")
@@ -92,7 +93,7 @@ class chat_server():
     def send_helo_response(self, message, active_client):
         """Function called when the input is helo"""
         """Sends a message back to connected client"""
-        print("sending hello response")
+       
         text = message.split()[1]
         message_to_send = helo_response(text, cf.SERVER_IP, str(cf.SERVER_PORT), cf.STUDENT_NUMBER)
         active_client.socket.send(message_to_send.encode('utf-8'))
@@ -135,20 +136,22 @@ class chat_server():
 
     def manage_leave(self, message, connection_socket):
         l.info(l_pre + 'Managing leave for client')
-        print('managing leave for client')
+        
         room_id, join_id, client_name = parse_leave(message)
-      
+        self.mutex.acquire()
         for room_name in self.active_chatrooms:
             if(self.active_chatrooms[room_name].room_reference == int(room_id)):
-                self.active_chatrooms[room_name].remove_client_from_chatroom(client_name, join_id)    
+                self.active_chatrooms[room_name].remove_client_from_chatroom(client_name, join_id, 0)    
                 break
-    
+        self.mutex.release()
 
 
     def manage_disconnect(self, message, active_client):
+        self.mutex.acquire()
+
         for room_name in self.active_chatrooms:
-            self.active_chatrooms[room_name].remove_client_from_chatroom(active_client.name, active_client.join_id)
-        
+            self.active_chatrooms[room_name].remove_client_from_chatroom(active_client.name, active_client.join_id, 1)
+        self.mutex.release()
 
     def does_chatroom_exist(self, chatroom_name):
         for i, chatroom in enumerate(self.active_chatrooms):

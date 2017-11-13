@@ -41,7 +41,7 @@ class chatroom:
        
         if(not(self.is_client_in_chatroom(active_client))):
             l.warning(l_pre + 'client: ' + active_client.client_name + ' unauthorised to send message to this chatroom')
-            self.mutex.release()
+            
             return
         message_to_send = chat_format(str(self.room_reference), active_client.name, message)
         for client_name in self.connected_clients:
@@ -57,18 +57,17 @@ class chatroom:
             return True
         return False
 
-    def remove_client_from_chatroom(self, client_name, join_id):
-        print('testing ids: client_name: ', client_name, 'join_id', join_id)
-        print('names in chatroom: ', self.join_ids.keys())
+    def remove_client_from_chatroom(self, client_name, join_id, disconnect):
+        
         if (client_name in self.join_ids) and (str(self.join_ids[client_name]) == str(join_id)):
-            print('id match, client name: ', client_name, 'join_id: ', join_id)
+            
             response = leave_response(self.room_reference, self.join_ids[client_name])
             message_to_clients = client_name + ' has left this chatroom'
             self.mutex.acquire()
-           
-            
+            if (disconnect == 0):
+                self.connected_clients[client_name].socket.send(response.encode(cf.ENCODING_SCHEME))
             self.send_message_to_connected_clients(message_to_clients, self.connected_clients[client_name])
-            self.connected_clients[client_name].socket.send(response.encode(cf.ENCODING_SCHEME))
+           
             self.mutex.release()
             
             self.mutex.acquire()
