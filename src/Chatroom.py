@@ -50,12 +50,17 @@ class chatroom:
         return False
 
     def remove_client_from_chatroom(self, client_name, join_id):
+        print('testing ids: client_name: ', client_name, 'join_id', join_id)
+        print('names in chatroom: ', self.join_ids.keys())
         if (client_name in self.join_ids) and (str(self.join_ids[client_name]) == str(join_id)):
+            print('id match, client name: ', client_name, 'join_id: ', join_id)
             response = leave_response(self.room_reference, self.join_ids[client_name])
-            self.connected_clients[client_name].socket.send(response)
+            self.connected_clients[client_name].socket.send(response.encode(cf.ENCODING_SCHEME))
+            
+            message_to_clients = client_name + ' has left this chatroom'
+            self.send_message_to_connected_clients(message_to_clients, self.connected_clients[client_name])
             del(self.connected_clients[client_name])
             del(self.join_ids[client_name])
-            
             return True
 
         return False

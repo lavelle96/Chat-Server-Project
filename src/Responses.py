@@ -8,5 +8,5 @@ def helo_response(text, ip, port, student_number):
     return  "HELO " + text + "\nIP: " + ip + '\nPort: ' + port + '\nStudentID: ' + student_number + '\n'
 
 def leave_response(room_ref, join_id):
-    return "LEFT_CHATROOM: " + room_ref + '\nJOIN_ID: ' + join_id + '\n'  
+    return "LEFT_CHATROOM: " + str(room_ref) + '\nJOIN_ID: ' + str(join_id) + '\n'  
 		  

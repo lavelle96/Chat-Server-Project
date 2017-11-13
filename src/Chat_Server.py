@@ -74,6 +74,8 @@ class chat_server():
                 self.manage_chat(message, active_client)
             elif(message_split[0] == 'LEAVE_CHATROOM:'):
                 self.manage_leave(message, active_client)
+            elif(message_split[0] == 'DISCONNECT:'):
+                self.manage_disconnect(message, active_client)
                     
         print('connection_finished')
         active_client.socket.close()
@@ -141,8 +143,9 @@ class chat_server():
     def manage_command_line_input(self):
         """Function checking everything input on the command line and stopping the program if KILL_SERVICE is input """
         """Thread"""
+
         l.info(l_pre + 'Thread set up to manage command line info')
-        '''  while 1:
+        while 1:
             command = input()
             if command == "KILL_SERVICE":
                 self.server_socket.close()
@@ -154,7 +157,7 @@ class chat_server():
                     connected_clients = self.active_chatrooms[chatroom_name].connected_clients
                     print(chatroom_name, ' has the following connected clients: ')
                     for client_name in connected_clients:
-                        print(client_name, ' ') '''
+                        print(client_name, ' ')
                 
 
 ss = chat_server()  
