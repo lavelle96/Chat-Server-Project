@@ -109,12 +109,12 @@ class chat_server():
         if(chatroom_name == None):
             print("Incomplete join call")
             return 
-        self.mutex.acquire()
+     
         if not(chatroom_name in self.active_chatrooms):
             self.active_chatrooms[chatroom_name] = chatroom(self.current_room_reference, chatroom_name)
             self.current_room_reference += 1
         self.active_chatrooms[chatroom_name].manage_client_join_and_response(active_client)
-        self.mutex.release()
+
        
             
         
@@ -126,30 +126,29 @@ class chat_server():
         room_ref, join_id, client_name, message = parse_chat(message)
         '''temp_client = client(active_client.socket, active_client.address)
         temp_client.set_name(client_name)'''
-        self.mutex.acquire()
+      
         for room_name in self.active_chatrooms:
             if(self.active_chatrooms[room_name].room_reference == int(room_ref)):             
                 self.active_chatrooms[room_name].send_message_to_connected_clients(message, active_client)
                 break
-        self.mutex.release()
+   
 
     def manage_leave(self, message, connection_socket):
         l.info(l_pre + 'Managing leave for client')
         print('managing leave for client')
         room_id, join_id, client_name = parse_leave(message)
-        self.mutex.acquire()
+      
         for room_name in self.active_chatrooms:
             if(self.active_chatrooms[room_name].room_reference == int(room_id)):
                 self.active_chatrooms[room_name].remove_client_from_chatroom(client_name, join_id)    
                 break
-        self.mutex.release()
+    
 
 
     def manage_disconnect(self, message, active_client):
-        self.mutex.acquire()
         for room_name in self.active_chatrooms:
             self.active_chatrooms[room_name].remove_client_from_chatroom(active_client.name, active_client.join_id)
-        self.mutex.release()
+        
 
     def does_chatroom_exist(self, chatroom_name):
         for i, chatroom in enumerate(self.active_chatrooms):

@@ -30,13 +30,15 @@ class chatroom:
         self.mutex.release()
         message_to_send = join_response(self.chatroom_name, str(cf.SERVER_IP), str(active_client.address[1]), str(self.room_reference), str(active_client.join_id))
         active_client.socket.send(message_to_send.encode('utf-8'))
+        self.mutex.acquire()
         self.send_message_to_connected_clients(active_client.name + " has joined the chatroom", active_client)
+        self.mutex.release()
         
 
     def send_message_to_connected_clients(self, message, active_client):
         """Sends given message to every connected client in the chat room"""
         l.info(l_pre + 'sending '+ message + ' to connected clients')
-        self.mutex.acquire()
+       
         if(not(self.is_client_in_chatroom(active_client))):
             l.warning(l_pre + 'client: ' + active_client.client_name + ' unauthorised to send message to this chatroom')
             self.mutex.release()
@@ -46,7 +48,7 @@ class chatroom:
             #if not(client[0] == client_name and client[1] == int(join_id)):
             l.info(l_pre + 'sending message to ' + client_name)
             self.connected_clients[client_name].socket.send(message_to_send.encode('utf-8'))
-        self.mutex.release()
+        
 
 
     def is_client_in_chatroom(self, active_client):
@@ -62,10 +64,14 @@ class chatroom:
             print('id match, client name: ', client_name, 'join_id: ', join_id)
             response = leave_response(self.room_reference, self.join_ids[client_name])
             message_to_clients = client_name + ' has left this chatroom'
+            self.mutex.acquire()
+           
+            
             self.send_message_to_connected_clients(message_to_clients, self.connected_clients[client_name])
+            self.connected_clients[client_name].socket.send(response.encode(cf.ENCODING_SCHEME))
+            self.mutex.release()
             
             self.mutex.acquire()
-            self.connected_clients[client_name].socket.send(response.encode(cf.ENCODING_SCHEME))
             del(self.connected_clients[client_name])
             del(self.join_ids[client_name])
             self.mutex.release()
