@@ -11,4 +11,4 @@ To run the project, simply run the start.sh program:
 - *Locks* are used to make sure the data shared by the clients and chat server isnt corrupted, the Lock object from the threading class was used to implement this securely.
 
 ## Results
--The program obtained full marks when tested against the test server in TCD, passing every test available.
+- The program obtained full marks when tested against the test server in TCD, passing every test available.
