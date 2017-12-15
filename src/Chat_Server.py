@@ -149,7 +149,21 @@ class chat_server():
     def manage_disconnect(self, message, active_client):
         self.mutex.acquire()
 
-        for room_name in self.active_chatrooms:
+        keys = self.active_chatrooms.keys()
+        order = []
+        chatrooms = self.active_chatrooms.copy()
+
+        while len(chatrooms)>0:
+            min = 1000
+            min_room = ""
+            for room_name in chatrooms:
+                if chatrooms[room_name].room_reference < min:
+                    min = chatrooms[room_name].room_reference
+                    min_room = room_name
+            
+            order.append(min_room)
+            del(chatrooms[min_room])
+        for room_name in order:
             self.active_chatrooms[room_name].remove_client_from_chatroom(active_client.name, active_client.join_id, 1)
         self.mutex.release()
 
@@ -158,7 +172,6 @@ class chat_server():
             if chatroom[0].chatroom_name == chatroom_name:
                 return i
         return -1
-    
     
         #Function looking out for 'KILL_SERVICE' to end client socket
     def manage_command_line_input(self):
